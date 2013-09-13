@@ -11,7 +11,7 @@ struct stat {
         gid_t		st_gid;		/* unsigned int */
         dev_t		st_rdev;	/* unsigned long */
         unsigned long   __pad1;
-        size_t		st_size;	/* long */
+        off_t		st_size;	/* long */
         blksize_t	st_blksize;	/* int */
         int             __pad2;
         blkcnt_t	st_blocks;	/* long */
@@ -22,9 +22,8 @@ struct stat {
         unsigned int    __unused5;
 };
 
-/* FIXME: linux kernel include/uapi/asm-generic/stat.h is used on
-   AArch64. It defines size_t as long. musl defines size_t as
-   unsigned long (include/alltypes.h). Is this OK? Then, the timespec
+/* FIXME:
+   The timespec
    struct is defining long, long. The linux kernel defines long,
    unsigned long. What should be done? Redefining timespec as
    STRUCT timespec { time_t tv_sec; unsigned long tv_nsec; };? */
