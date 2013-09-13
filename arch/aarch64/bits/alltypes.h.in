@@ -10,6 +10,8 @@ TYPEDEF unsigned int wchar_t;
 #endif
 TYPEDEF unsigned wint_t;
 
+TYPEDEF int blksize_t;
+
 TYPEDEF float float_t;
 TYPEDEF double double_t;
 
