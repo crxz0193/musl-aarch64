@@ -1,0 +1,17 @@
+#define _Addr long
+#define _Int64 long
+#define _Reg long
+
+TYPEDEF __builtin_va_list va_list;
+TYPEDEF __builtin_va_list __isoc_va_list;
+
+#ifndef __cplusplus
+TYPEDEF unsigned int wchar_t;
+#endif
+TYPEDEF unsigned wint_t;
+
+TYPEDEF float float_t;
+TYPEDEF double double_t;
+
+TYPEDEF long time_t;
+TYPEDEF long suseconds_t;
