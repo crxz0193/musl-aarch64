@@ -21,9 +21,3 @@ struct stat {
         unsigned int    __unused4;
         unsigned int    __unused5;
 };
-
-/* FIXME:
-   The timespec
-   struct is defining long, long. The linux kernel defines long,
-   unsigned long. What should be done? Redefining timespec as
-   STRUCT timespec { time_t tv_sec; unsigned long tv_nsec; };? */
