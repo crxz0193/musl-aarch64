@@ -42,6 +42,7 @@ struct termios
 #define IXANY   0004000
 #define IXOFF   0010000
 #define IMAXBEL 0020000
+#define IUTF8   0040000
 
 #define OPOST  0000001
 #define OLCUC  0000002
@@ -75,7 +76,6 @@ struct termios
 #define VT0    0000000
 #define VT1    0040000
 
-/* ?? */
 #define XTABS  0014000
 
 #define B0       0000000
