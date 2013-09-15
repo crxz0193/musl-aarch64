@@ -37,6 +37,7 @@ static inline void do_single_reloc(
 		*reloc_addr = def.dso ? def.dso->tls_id : self->tls_id;
 		break;
 	}
+	/* FIXME: Are all cases met? Are they handled correctly? */
 }
 
 #define NO_LEGACY_INITFINI
