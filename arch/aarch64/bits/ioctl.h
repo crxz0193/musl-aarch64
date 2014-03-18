@@ -58,7 +58,8 @@
 #define TIOCGRS485      0x542E
 #ifndef TIOCSRS485
 #define TIOCSRS485      0x542F
-/* FIXME: calculate return value
+#endif //TIOCSRS485
+/* FIXME: calculate return value */
 #define TIOCGPTN        _IOR('T', 0x30, unsigned int)
 #define TIOCSPTLCK      _IOW('T', 0x31, int)
 #define TIOCGDEV        _IOR('T', 0x32, unsigned int) */
