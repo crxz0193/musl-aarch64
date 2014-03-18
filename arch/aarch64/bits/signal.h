@@ -7,19 +7,20 @@
 
 typedef struct sigcontext
 {
-	unsigned long fault_address;
-	unsigned long regs[31];
-	unsigned long sp, pc;
-	unsigned long pstate;
-	unsigned char __reserved[4096] __attribute((__aligned__(16)));
+	//unsigned long fault_address;
+	uint64_t  regs[31];
+	uint64_t  sp, pc;
+	uint64_t  pstate;
+	uint8_t   __reserved[4096] __attribute((__aligned__(16)));
 } mcontext_t;
 
 typedef struct __ucontext {
-	unsigned long uc_flags;
-	struct __ucontext *uc_link;
-	stack_t uc_stack;
-	sigset_t uc_sigmask;
-	mcontext_t uc_mcontext;
+	unsigned long 		 uc_flags;
+	struct __ucontext 	*uc_link;
+	stack_t  			 uc_stack;
+	sigset_t 			 uc_sigmask;
+	uint8_t  			 __unused[1024/8-sizeof(sigset)];
+	mcontext_t 			 uc_mcontext;
 } ucontext_t;
 
 #define SA_NOCLDSTOP  1
@@ -69,3 +70,27 @@ typedef struct __ucontext {
 #define SIGUNUSED SIGSYS
 
 #define _NSIG 64
+
+
+/*
+ * Header to be used at the beginning of structures extending the user
+ * context. Such structures must be placed after the rt_sigframe on the stack
+ * and be 16-byte aligned. The last structure must be a dummy one with the
+ * magic and size set to 0.
+ */
+struct _aarch64_ctx {
+	uint32_t  magic;
+	uint32_t  size;
+};
+
+#define FPSIMD_MAGIC	0x46508001
+
+
+struct fpsimd_context {
+	struct _aarch64_ctx head;
+	uint32_t  fpsr;
+	uint32_t  fpcr;
+	// TODO: verify if uint128_t needs a defination in alltypes.h.in
+	__uint128_t vregs[32];
+};
+
