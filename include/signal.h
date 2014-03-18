@@ -24,6 +24,9 @@ extern "C" {
 #define __NEED_time_t
 #define __NEED_clock_t
 #define __NEED_sigset_t
+#define __NEED_uint8_t
+#define __NEED_uint32_t
+#define __NEED_uint64_t
 
 #include <bits/alltypes.h>
 
