@@ -1,7 +1,7 @@
-#define O_ACCMODE       00000003
-#define O_RDONLY        00000000
-#define O_WRONLY        00000001
-#define O_RDWR          00000002
+//#define O_ACCMODE       00000003
+//#define O_RDONLY        00000000
+//#define O_WRONLY        00000001
+//#define O_RDWR          00000002
 
 #define O_CREAT        0100
 #define O_EXCL         0200
