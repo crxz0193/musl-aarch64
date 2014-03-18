@@ -22,10 +22,10 @@ static inline void do_single_reloc(
 	switch(type) {
 	case R_AARCH64_GLOB_DAT:
 	case R_AARCH64_JUMP_SLOT:
-	case R_AARCH64_64:
+	case R_AARCH64_ABS64:
 		*reloc_addr = sym_val + addend;
 		break;
-	case R_AARCH64_32:
+	case R_AARCH64_ABS32:
 		*(uint32_t *)reloc_addr = sym_val + addend;
 	case R_AARCH64_RELATIVE:
 		*reloc_addr += (size_t)base_addr + addend;
@@ -33,7 +33,7 @@ static inline void do_single_reloc(
 	case R_AARCH64_COPY:
 		memcpy(reloc_addr, (void *)sym_val, sym_size);
 		break;
-	case R_AARCH64_TLS_DTPMOD:
+	case R_AARCH64_TLS_DTPMOD64:
 		*reloc_addr = def.dso ? def.dso->tls_id : self->tls_id;
 		break;
 	}
