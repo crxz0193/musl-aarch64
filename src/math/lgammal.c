@@ -96,7 +96,8 @@ long double __lgammal_r(long double x, int *sg)
 {
 	return __lgamma_r(x, sg);
 }
-#elif LDBL_MANT_DIG == 64 && LDBL_MAX_EXP == 16384
+#elif ((LDBL_MANT_DIG == 64 || LDBL_MANT_DIG==113) \
+                         && LDBL_MAX_EXP == 16384)
 static const long double
 pi = 3.14159265358979323846264L,
 two63 = 9.223372036854775808e18L,
@@ -204,7 +205,11 @@ w7 =  4.885026142432270781165E-3L;
 static long double sin_pi(long double x)
 {
 	union ldshape u = {x};
+#if LDBL_MANT_DIG == 113
+	uint32_t ix = (u.i.se & 0x7fffU)<<16 | u.i.lo>>48;
+#else
 	uint32_t ix = (u.i.se & 0x7fffU)<<16 | u.i.m>>48;
+#endif//
 	long double y, z;
 	int n;
 
@@ -229,7 +234,11 @@ static long double sin_pi(long double x)
 			if (ix < 0x403e8000)  /* 2^63 */
 				z = y + two63;  /* exact */
 			u.f = z;
+#if LDBL_MANT_DIG == 113
+			n = u.i.lo & 1;
+#else
 			n = u.i.m & 1;
+#endif//
 			y = n;
 			n <<= 2;
 		}
@@ -261,7 +270,11 @@ static long double sin_pi(long double x)
 long double __lgammal_r(long double x, int *sg) {
 	long double t, y, z, nadj, p, p1, p2, q, r, w;
 	union ldshape u = {x};
+#if LDBL_MANT_DIG == 113
+	uint32_t ix = (u.i.se & 0x7fffU)<<16 | u.i.lo>>48;
+#else
 	uint32_t ix = (u.i.se & 0x7fffU)<<16 | u.i.m>>48;
+#endif//
 	int sign = u.i.se >> 15;
 	int i;
 
