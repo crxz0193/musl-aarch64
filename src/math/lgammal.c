@@ -96,9 +96,11 @@ long double __lgammal_r(long double x, int *sg)
 {
 	return __lgamma_r(x, sg);
 }
-#elif LDBL_MANT_DIG == 64 && LDBL_MAX_EXP == 16384
+#elif ((LDBL_MANT_DIG == 64 || LDBL_MANT_DIG==113) \
+                         && LDBL_MAX_EXP == 16384)
 static const long double
 pi = 3.14159265358979323846264L,
+two63 = 9.223372036854775808e18L,
 
 /* lgam(1+x) = 0.5 x + x a(x)/b(x)
     -0.268402099609375 <= x <= 0
@@ -205,7 +207,7 @@ static long double sin_pi(long double x)
 {
 	int n;
 
-	/* spurious inexact if odd int */
+
 	x *= 0.5;
 	x = 2.0*(x - floorl(x));  /* x mod 2.0 */
 
@@ -215,7 +217,7 @@ static long double sin_pi(long double x)
 	x *= pi;
 
 	switch (n) {
-	default: /* case 4: */
+	default:
 	case 0: return __sinl(x, 0.0, 0);
 	case 1: return __cosl(x, 0.0);
 	case 2: return __sinl(-x, 0.0, 0);
@@ -226,13 +228,17 @@ static long double sin_pi(long double x)
 long double __lgammal_r(long double x, int *sg) {
 	long double t, y, z, nadj, p, p1, p2, q, r, w;
 	union ldshape u = {x};
+#if LDBL_MANT_DIG == 113
+	uint32_t ix = (u.i.se & 0x7fffU)<<16 | u.i.lo>>48;
+#else
 	uint32_t ix = (u.i.se & 0x7fffU)<<16 | u.i.m>>48;
+#endif//
 	int sign = u.i.se >> 15;
 	int i;
 
 	*sg = 1;
 
-	/* purge off +-inf, NaN, +-0, tiny and negative arguments */
+	/* purge off +-inf, NaN, +-0, and negative arguments */
 	if (ix >= 0x7fff0000)
 		return x * x;
 	if (ix < 0x3fc08000) {  /* |x|<2**-63, return -log(|x|) */
@@ -244,7 +250,7 @@ long double __lgammal_r(long double x, int *sg) {
 	}
 	if (sign) {
 		x = -x;
-		t = sin_pi(x);
+		t = sin_pi (x);
 		if (t == 0.0)
 			return 1.0 / (x-x); /* -integer */
 		if (t > 0.0)
@@ -342,7 +348,7 @@ long double __lgammal_r(long double x, int *sg) {
 }
 #endif
 
-#if (LDBL_MANT_DIG == 53 && LDBL_MAX_EXP == 1024) || (LDBL_MANT_DIG == 64 && LDBL_MAX_EXP == 16384)
+#if (LDBL_MANT_DIG == 53 && LDBL_MAX_EXP == 1024) || ((LDBL_MANT_DIG == 64 || LDBL_MANT_DIG==113) && LDBL_MAX_EXP == 16384)
 extern int __signgam;
 
 long double lgammal(long double x)

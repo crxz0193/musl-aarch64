@@ -407,9 +407,9 @@ float       y1f(float);
 float       ynf(int, float);
 #endif
 
-#ifdef _GNU_SOURCE
 long double lgammal_r(long double, int*);
 
+#ifdef _GNU_SOURCE
 void        sincos(double, double*, double*);
 void        sincosf(float, float*, float*);
 void        sincosl(long double, long double*, long double*);
