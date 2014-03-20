@@ -1,4 +1,5 @@
-#include <asm/bitsperlong.h>
+/*#include <asm/bitsperlong.h>*/
+
 #ifndef __SYSCALL_COMPAT
 #define __SYSCALL_COMPAT
 #endif //__SYSCALL_COMPAT
