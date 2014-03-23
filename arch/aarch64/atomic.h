@@ -22,7 +22,8 @@ static inline int a_ctz_64(uint64_t x)
 	return a_ctz_l(y);
 }
 
-#define __k_cas ((int (*)(int, int, volatile int *))0xffff0fc0)
+#define __k_cas ((int (*)(int, int, volatile int *))0xffffffc00008c060)
+//#define __k_cas ((int (*)(int, int, volatile int *))0xffff0fc0)
 
 static inline int a_cas(volatile int *p, int t, int s)
 {
