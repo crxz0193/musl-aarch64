@@ -14,6 +14,13 @@ typedef struct sigcontext
 	uint8_t   __reserved[4096] __attribute((__aligned__(16)));
 } mcontext_t;
 
+//arm/bits/signal.h
+struct sigaltstack {
+	void *ss_sp;
+	int ss_flags;
+	size_t ss_size;
+};
+
 typedef struct __ucontext {
 	unsigned long 		 uc_flags;
 	struct __ucontext 	*uc_link;

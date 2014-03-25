@@ -261,7 +261,11 @@ long double __lgammal_r(long double x, int *sg) {
 	}
 
 	/* purge off 1 and 2 (so the sign is ok with downward rounding) */
+#if LDBL_MANT_DIG == 113
+	if ((ix == 0x3fff8000 || ix == 0x40008000) && u.i.lo == 0) {
+#else
 	if ((ix == 0x3fff8000 || ix == 0x40008000) && u.i.m == 0) {
+#endif //
 		r = 0;
 	} else if (ix < 0x40008000) {  /* x < 2.0 */
 		if (ix <= 0x3ffee666) {  /* 8.99993896484375e-1 */
