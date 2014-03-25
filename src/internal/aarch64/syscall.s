@@ -3,6 +3,11 @@
 
 //code.metager.de/source/xref/gnu/glibc/sysdeps/unix/sysv/linux/aarch64/syscall.S
 __syscall:
+	stp x29,x30, [sp,#-16]!
+	mov x29, sp
+
+	str x8, [sp,#-16]!
+
 	uxtw x8,w0
 	mov	 x0,x1
 	mov  x1,x2
@@ -12,5 +17,11 @@ __syscall:
 	mov  x5,x6
 	mov  x6,x7
 	svc  0x0
-	cmn  x0,#4095
+	
+	ldr x8,       [sp], #16
+	ldp x29, x30, [sp], #16
 
+	/* check return error*/
+	cmn x0, #4095 /*0xfff*/
+	/*cneg x0, x0, hi*/
+	ret
