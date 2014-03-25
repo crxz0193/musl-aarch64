@@ -1,4 +1,4 @@
-
+/*bionic syscall implementation*/
 .global __syscall_cp_asm
 .type __syscall_cp_asm,%function
 __syscall_cp_asm:
@@ -25,3 +25,4 @@ __cp_end:
 	ldp x29, x30, [sp], #16
 	
 	/*check return status*/
+	ret
