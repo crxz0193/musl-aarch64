@@ -28,12 +28,26 @@ static inline int a_ctz_64(uint64_t x)
 static inline int a_cas(volatile int *p, int t, int s)
 {
 	int old;
-	for (;;) {
-		if (!__k_cas(t, s, p))
-			return t;
-		if ((old=*p) != t)
-			return old;
-	}
+//	for (;;) {
+//		if (!__k_cas(t, s, p))
+//			return t;
+//		if ((old=*p) != t)
+//			return old;
+//	}
+//linux/arch/arm64/include/asm/atomic.h
+	unsigned long tmp;
+	__asm__ volatile (" //atomic compare and exchange \n"
+	"1: ldaxr %w1, %2\n"
+	"   cmp   %w1, %w3\n"
+	"   b.ne  2f\n"
+	"   stlxr %w0, %w4, %2\n"
+	"   cbnz  %w0, 1b\n"
+	"2:"
+	  : "=&r" (tmp), "=&r" (old), "+Q" (*p)
+	  : "Ir" (old),"r" (s)
+	  : "cc", "memory");
+
+	return old;
 }
 
 static inline void *a_cas_p(volatile void *p, void *t, void *s)
@@ -50,7 +64,8 @@ static inline int a_swap(volatile int *x, int v)
 {
 	int old;
 	do old = *x;
-	while (__k_cas(old, v, x));
+	while (a_cas(x,old, v));
+	//while (__k_cas(old, v, x));
 	return old;
 }
 
