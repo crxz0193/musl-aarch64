@@ -5,47 +5,47 @@
 
 static inline int a_ctz_l(unsigned long x)
 {
-	static const char debruijn32[32] = {
-		0, 1, 23, 2, 29, 24, 19, 3, 30, 27, 25, 11, 20, 8, 4, 13,
-		31, 22, 28, 18, 26, 10, 7, 12, 21, 17, 9, 6, 16, 5, 15, 14
-	};
-	return debruijn32[(x&-x)*0x076be629 >> 27];
+	int result;
+	__asm__ volatile( "// a_store\n"
+	"1: rbit %0, %1\n"
+	"   clz %0, %0\n"
+	    : "=r" (result)
+		: "r" (x)
+	);
+	
+	return result;
+
 }
 
 static inline int a_ctz_64(uint64_t x)
 {
-	uint32_t y = x;
-	if (!y) {
-		y = x>>32;
-		return 32 + a_ctz_l(y);
-	}
-	return a_ctz_l(y);
+	int result =0;
+	__asm__ volatile( "// a_store\n"
+	"1: rbit %0, %1\n"
+	"   clz %0, %0\n"
+	    : "=r" (result)
+		: "r" (x)
+	);
+	
+	return result;
 }
-
-#define __k_cas ((int (*)(int, int, volatile int *))0xffffffc00008c060)
-//#define __k_cas ((int (*)(int, int, volatile int *))0xffff0fc0)
 
 static inline int a_cas(volatile int *p, int t, int s)
 {
 	int old;
-//	for (;;) {
-//		if (!__k_cas(t, s, p))
-//			return t;
-//		if ((old=*p) != t)
-//			return old;
-//	}
-//linux/arch/arm64/include/asm/atomic.h
 	unsigned long tmp;
-	__asm__ volatile (" //atomic compare and exchange \n"
-	"1: ldaxr %w1, %2\n"
-	"   cmp   %w1, %w3\n"
-	"   b.ne  2f\n"
-	"   stlxr %w0, %w4, %2\n"
-	"   cbnz  %w0, 1b\n"
+
+//linux/arch/arm64/include/asm/atomic.h
+	__asm__ volatile("// atomic_cmpxchg\n"
+	"1:	ldaxr	%w1, %2\n"
+	"	cmp	    %w1, %w3\n"
+	"	b.ne	2f\n"
+	"	stlxr	%w0, %w4, %2\n"
+	"	cbnz	%w0, 1b\n"
 	"2:"
-	  : "=&r" (tmp), "=&r" (old), "+Q" (*p)
-	  : "Ir" (old),"r" (s)
-	  : "cc", "memory");
+		: "=&r" (tmp), "=&r" (old), "+Q" (*p)
+		: "Ir" (t), "r" (s)
+		: "cc", "memory");
 
 	return old;
 }
@@ -65,16 +65,40 @@ static inline int a_swap(volatile int *x, int v)
 	int old;
 	do old = *x;
 	while (a_cas(x,old, v));
-	//while (__k_cas(old, v, x));
 	return old;
+}
+
+static inline int a_fetch_sub(volatile int *x, int v)
+{
+
+	unsigned long tmp;
+	int result;
+	__asm__ volatile( "// fetch add\n"
+	"1: ldxr %w0, %2\n"
+    "   sub  %w0, %w0, %w3\n"
+	"   stlxr %w1, %w0,  %2\n"
+	"   cbnz %w1, 1b"
+	    : "=&r" (result), "=&r" (tmp), "+Q"(*x)
+		: "Ir" (v)
+		: "cc"
+	);
+	return tmp;
 }
 
 static inline int a_fetch_add(volatile int *x, int v)
 {
-	int old;
-	do old = *x;
-	while (__k_cas(old, old+v, x));
-	return old;
+	unsigned long tmp;
+	int result;
+	__asm__ volatile( "// fetch add\n"
+	"1: ldxr %w0, %2\n"
+    "   add  %w0, %w0, %w3\n"
+	"   stlxr %w1, %w0,  %2\n"
+	"   cbnz %w1, 1b"
+	    : "=&r" (result), "=&r" (tmp), "+Q"(*x)
+		: "Ir" (v)
+		: "cc"
+	);
+	return tmp;
 }
 
 static inline void a_inc(volatile int *x)
@@ -84,12 +108,22 @@ static inline void a_inc(volatile int *x)
 
 static inline void a_dec(volatile int *x)
 {
-	a_fetch_add(x, -1);
+	a_fetch_sub(x, -1);
 }
 
 static inline void a_store(volatile int *p, int x)
 {
-	while (__k_cas(*p, x, p));
+	unsigned long tmp;
+	int result;
+/*	__asm__ volatile( "// fetch add\n"
+	"   ldxr %0, %1\n" 
+	"   stxr %w0, %2,%1\n"
+        : "=&r"(result),"+Q" (*p) 
+        : "Ir" (x) 
+        : "cc", "memory" 
+	);
+*/
+   *p = x;
 }
 
 static inline void a_spin()
@@ -103,16 +137,35 @@ static inline void a_crash()
 
 static inline void a_and(volatile int *p, int v)
 {
-	int old;
-	do old = *p;
-	while (__k_cas(old, old&v, p));
+
+	unsigned long tmp;
+	int result;
+	__asm__ volatile( "// fetch add\n"
+	"1: ldxr %w0, %2\n"
+    "   and  %0, %0, %3\n"
+	"   stxr %w1, %0,%2\n"
+	"   cbnz %w1, 1b"
+	    : "=&r" (result), "=&r" (tmp), "+Q"(*p)
+		: "Ir" (v)
+		: "cc"
+	);
+
+
 }
 
 static inline void a_or(volatile int *p, int v)
 {
-	int old;
-	do old = *p;
-	while (__k_cas(old, old|v, p));
+	unsigned long tmp;
+	int result;
+	__asm__ volatile( "// fetch add\n"
+	"1: ldxr %w0, %2\n"
+    "   orr  %0, %0, %3\n"
+	"   stxr %w1, %0,%2\n"
+	"   cbnz %w1, 1b"
+	    : "=&r" (result), "=&r" (tmp), "+Q"(*p)
+		: "Ir" (v)
+		: "cc"
+	);
 }
 
 static inline void a_or_l(volatile void *p, long v)
@@ -122,16 +175,32 @@ static inline void a_or_l(volatile void *p, long v)
 
 static inline void a_and_64(volatile uint64_t *p, uint64_t v)
 {
-	union { uint64_t v; uint32_t r[2]; } u = { v };
-	a_and((int *)p, u.r[0]);
-	a_and((int *)p+1, u.r[1]);
+	unsigned long tmp;
+	int result;
+	__asm__ volatile( "// fetch add\n"
+	"1: ldxr %w0, %2\n"
+    "   and   %0, %0, %3\n"
+	"   stxr %w1, %0, %2\n"
+	"   cbnz %w1, 1b"
+	    : "=&r" (result), "=&r" (tmp), "+Q"(*p)
+		: "Ir" (v)
+		: "cc"
+	);
 }
 
 static inline void a_or_64(volatile uint64_t *p, uint64_t v)
 {
-	union { uint64_t v; uint32_t r[2]; } u = { v };
-	a_or((int *)p, u.r[0]);
-	a_or((int *)p+1, u.r[1]);
+	unsigned long tmp;
+	int result;
+	__asm__ volatile( "// fetch add\n"
+	"1: ldxr %w0, %2\n"
+    "   orr   %0, %0, %3\n"
+	"   stxr %w1, %0, %2\n"
+	"   cbnz %w1, 1b"
+	    : "=&r" (result), "=&r" (tmp), "+Q"(*p)
+		: "Ir" (v)
+		: "cc"
+	);
 }
 
 #endif
