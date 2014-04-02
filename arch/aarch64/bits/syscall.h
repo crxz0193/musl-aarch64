@@ -1,8 +1,8 @@
 /*#include <asm/bitsperlong.h>*/
 
-#ifndef __SYSCALL_COMPAT
-#define __SYSCALL_COMPAT
-#endif //__SYSCALL_COMPAT
+//#ifndef __SYSCALL_COMPAT
+//#define __SYSCALL_COMPAT
+//#endif //__SYSCALL_COMPAT
 
 #ifndef __ARCH_WANT_SYSCALL_DEPRECATED
 #define __ARCH_WANT_SYSCALL_DEPRECATED
@@ -17,7 +17,7 @@
 #endif // __ARCH_WANT_SYSCALL_NO_FLAGS
 
 #ifndef __ARCH_WANT_SYSCALL_OFF_T
-#define __ARCH_WANT_SYSCALL_OFF_T
+//#define __ARCH_WANT_SYSCALL_OFF_T
 #endif //__ARCH_WANT_SYSCALL_OFF_T
 /*
  * This file contains the system call numbers, based on the
@@ -1534,6 +1534,14 @@
 #define SYS_lstat __NR3264_lstat
 #endif
 #else
+ //enabled for musl
+#define __NR_lseek __NR3264_lseek
+#define SYS_lseek __NR3264_lseek  
+#define __NR_sendfile __NR3264_sendfile
+#define SYS_sendfile __NR3264_sendfile
+#define __NR_stat __NR_stat64
+#define SYS_stat  SYS_stat64
+ //enabled for musl
 #define __NR_fcntl64 __NR3264_fcntl
 #define SYS_fcntl64 __NR3264_fcntl
 #define __NR_statfs64 __NR3264_statfs
