@@ -7,7 +7,7 @@ int __statfs(const char *path, struct statfs *buf)
 {
 	*buf = (struct statfs){0};
 #ifdef SYS_statfs64
-	return syscall(SYS_statfs64, path, sizeof *buf, buf);
+	return syscall(SYS_statfs64, path, /*sizeof *buf,*/ buf);
 #else
 	return syscall(SYS_statfs, path, buf);
 #endif
@@ -17,7 +17,7 @@ int __fstatfs(int fd, struct statfs *buf)
 {
 	*buf = (struct statfs){0};
 #ifdef SYS_fstatfs64
-	return syscall(SYS_fstatfs64, fd, sizeof *buf, buf);
+	return syscall(SYS_fstatfs64, fd, /* sizeof *buf,*/ buf);
 #else
 	return syscall(SYS_fstatfs, fd, buf);
 #endif
